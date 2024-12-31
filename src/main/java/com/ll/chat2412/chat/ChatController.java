@@ -1,15 +1,12 @@
 package com.ll.chat2412.chat;
 
-import com.ll.chat2412.chat.dto.WriteMessageResponse;
+import com.ll.chat2412.chat.dto.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 /**
  * packageName    : com.ll.chat2412.chating
@@ -31,25 +28,46 @@ public class ChatController {
 
     @PostMapping("/writeMessage")
     @ResponseBody
-    public RsData<List<ChatMessage>> writeMessage() {   // 반환하는 chatMessages에 맞춰 지네릭스 설정함
+    public RsData<WriteMessageResponse> writeMessage(@RequestBody WriteMessageRequest writeMessageRequest) {   // 반환하는 chatMessages에 맞춰 지네릭스 설정함
 
-        // 기존
-//        new ChatMessage(1,"강성준", "와", LocalDateTime.now());
+        ChatMessage cm = new ChatMessage(writeMessageRequest.getAuthorName(), writeMessageRequest.getContent());
+        chatMessages.add(cm);
 
-        // ChatMessage 클래스 수정 후
-        ChatMessage ch = new ChatMessage("영희", "우와");
-        chatMessages.add(ch);
-
-        ChatMessage ch2 = new ChatMessage("철수", "우와와");
-        chatMessages.add(ch2);
-
-        return new RsData<List<ChatMessage>>("200", "메세지가 작성되었습니다.", chatMessages);
+        return new RsData("200", "메세지가 작성되었습니다.", new WriteMessageResponse(cm));
     }
 
-    @GetMapping("/writeMessage")
+    @GetMapping("/messages")
     @ResponseBody
-    public String getMessage() {
-        return "Get 응답입니다.";
+    public RsData<MessagesResponse> messages(MessagesRequest messagesRequest) {
+        List<ChatMessage> messages = chatMessages;
+
+        if (messagesRequest.fromId() != null) {
+            // for문을 통한 index 찾기
+//            int index = -1;
+//
+//            for (int i = 0; i < messages.size(); i++) {
+//                if (messages.get(i).getId() == messagesRequest.fromId()) {
+//                    index = i;
+//                    break;
+//                }
+//            }
+
+            // Stream을 통한 index 찾기
+            int index = IntStream.range(0, messages.size())
+                    .filter(i -> chatMessages.get(i).getId() == messagesRequest.fromId())
+                    .findFirst()
+                    .orElse(-1);
+
+            if (index != -1) {
+                messages = messages.subList(index + 1, messages.size());
+            }
+        }
+
+        return new RsData("200", "메시지 가져오기 성공", new MessagesResponse(messages, chatMessages.size()));
     }
 
+    @GetMapping("/room")
+    public String room() {
+        return "chat/room";
+    }
 }

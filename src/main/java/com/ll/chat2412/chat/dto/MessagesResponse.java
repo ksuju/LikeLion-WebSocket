@@ -1,12 +1,15 @@
-package com.ll.chat2412.chat;
+package com.ll.chat2412.chat.dto;
 
+import com.ll.chat2412.chat.ChatMessage;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
- * packageName    : com.ll.chat2412.chat
- * fileName       : RsData
+ * packageName    : com.ll.chat2412.chat.dto
+ * fileName       : MessageResponse
  * author         : sungjun
  * date           : 2024-12-31
  * description    : 자동 주석 생성
@@ -18,8 +21,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-public class RsData<T> {
-    private String resultCode;
-    private String msg;
-    private T data;
+public class MessagesResponse {
+    private List<ChatMessage> chatMessages;
+    private int totalCount;
 }
